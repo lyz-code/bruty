@@ -1,6 +1,6 @@
 .DEFAULT_GOAL := test
-isort = isort src docs/examples tests setup.py
-black = black --target-version py37 src docs/examples tests setup.py
+isort = isort src tests setup.py
+black = black --target-version py37 src tests setup.py
 
 .PHONY: install
 install:
@@ -20,10 +20,6 @@ update:
 	rm requirements.txt
 	touch requirements.txt
 	pip-compile -Ur --allow-unsafe
-
-	rm docs/requirements.txt
-	touch docs/requirements.txt
-	pip-compile -Ur --allow-unsafe docs/requirements.in --output-file docs/requirements.txt
 
 	rm requirements-dev.txt
 	touch requirements-dev.txt
@@ -67,7 +63,7 @@ mypy:
 	@echo ""
 
 .PHONY: test
-test: test-code test-examples
+test: test-code
 
 .PHONY: test-code
 test-code:
@@ -76,16 +72,6 @@ test-code:
 	@echo "----------------"
 
 	pytest --cov-report term-missing --cov src tests ${ARGS}
-
-	@echo ""
-
-.PHONY: test-examples
-test-examples:
-	@echo "--------------------"
-	@echo "- Testing examples -"
-	@echo "--------------------"
-
-	@find docs/examples -type f -name '*.py' | xargs -I'{}' sh -c 'python {} >/dev/null 2>&1 || (echo "{} failed" ; exit 1)'
 
 	@echo ""
 
@@ -122,16 +108,6 @@ clean:
 
 	@echo ""
 
-.PHONY: docs
-docs: test-examples
-	@echo "-------------------------"
-	@echo "- Serving documentation -"
-	@echo "-------------------------"
-
-	mkdocs serve
-
-	@echo ""
-
 .PHONY: bump
 bump: pull-master bump-version build-package upload-pypi clean
 
@@ -154,16 +130,6 @@ build-package: clean
 
 	python setup.py -q bdist_wheel
 	python setup.py -q sdist
-
-	@echo ""
-
-.PHONY: build-docs
-build-docs: test-examples
-	@echo "--------------------------"
-	@echo "- Building documentation -"
-	@echo "--------------------------"
-
-	mkdocs build
 
 	@echo ""
 

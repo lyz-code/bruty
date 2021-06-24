@@ -1,28 +1,33 @@
 """Command line interface definition."""
 
+from typing import List, Optional
+
 import click
-from bruty import version
-from bruty.entrypoints import (
-    load_config,
-    load_logger,
-)
+
+from .. import version
+from ..services import bruteforce
+from . import load_logger
 
 
-@click.group()
+@click.command(help="Bruteforce dynamic web applications with Selenium.")
 @click.version_option(version="", message=version.version_info())
+@click.argument("url")
+@click.option("-f", "--uris_file_path")
 @click.option("-v", "--verbose", is_flag=True)
-def cli(verbose: bool) -> None:
+@click.option("-n", "--not_found_regexp")
+@click.option("-u", "--uris", multiple=True)
+def cli(
+    url: str,
+    verbose: bool = False,
+    uris_file_path: Optional[str] = None,
+    uris: Optional[List[str]] = None,
+    not_found_regexp: Optional[str] = None,
+) -> None:
     """Command line interface main click entrypoint."""
-
     load_logger(verbose)
-
-
-@cli.command(hidden=True)
-def null() -> None:
-    """Do nothing.
-
-    Used for the tests until we have a better solution.
-    """
+    urls = bruteforce(url, uris, uris_file_path, not_found_regexp)
+    for url in urls:
+        print(url)
 
 
 if __name__ == "__main__":  # pragma: no cover

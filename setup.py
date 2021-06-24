@@ -6,7 +6,6 @@ from os.path import basename, splitext
 
 from setuptools import find_packages, setup
 
-
 # Avoid loading the package to extract the version
 with open("src/bruty/version.py") as fp:
     version_match = re.search(r'__version__ = "(?P<version>.*)"', fp.read())
@@ -54,5 +53,6 @@ setup(
     install_requires=[
         "selenium",
         "Click",
+        "rich",
     ],
 )

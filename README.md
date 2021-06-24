@@ -4,16 +4,52 @@
 [![Actions Status](https://github.com/lyz-code/bruty/workflows/Build/badge.svg)](https://github.com/lyz-code/bruty/actions)
 [![Coverage Status](https://coveralls.io/repos/github/lyz-code/bruty/badge.svg?branch=master)](https://coveralls.io/github/lyz-code/bruty?branch=master)
 
-Bruteforce dynamic web applications with Selenium
-
-## Help
-
-See [documentation](https://lyz-code.github.io/bruty) for more details.
+Bruteforce dynamic web applications with Selenium.
 
 ## Installing
 
 ```bash
 pip install bruty
+```
+
+It's assumed that you've got installed Chromium under `/usr/bin/chromium` and
+that the
+[chromedriver](https://sites.google.com/a/chromium.org/chromedriver/downloads)
+of the same version is found in your `PATH`.
+
+## Usage
+
+If you want to content from the https://fake.web website that is not found by
+crawlers, you can create a list of uris in a file such as:
+
+```
+admin
+wp-login
+```
+
+Then run:
+
+```bash
+bruty https://fake.web -f uris.txt
+```
+
+### Fake 404 pages
+
+Some sites return a 200 status code for the 404, if it's your case, inspect the
+code of one of them and create a regular expression to catch them, imagine it's
+`404 error`.
+
+To test that it works run `bruty` against two urls, one that exists and another
+that returns the fake 404, making sure that only the existent one is printed.
+
+```bash
+bruty https://fake.web -u index.html -u fake_404.html -n '404 error'
+```
+
+Once you know it works, run it against all the uris:
+
+```bash
+bruty https://fake.web -f uris.txt -n '404 error'
 ```
 
 ## Contributing
