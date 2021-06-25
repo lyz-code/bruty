@@ -5,6 +5,7 @@ and handlers to achieve the program's purpose.
 """
 
 import json
+import logging
 import re
 from contextlib import suppress
 from typing import Any, Dict, List, Optional
@@ -14,12 +15,18 @@ from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 
+log = logging.getLogger(__name__)
+logging.getLogger("selenium").setLevel(logging.WARNING)
+logging.getLogger("urllib3").setLevel(logging.WARNING)
+
 
 def bruteforce(
     base_url: str,
     uris: Optional[List[str]] = None,
     uris_file_path: Optional[str] = None,
     not_found_regexp: Optional[str] = None,
+    verbose: bool = False,
+    ignore_status_code: bool = False,
 ) -> List[str]:
     """Return the urls that exist.
 
@@ -36,7 +43,7 @@ def bruteforce(
     capabilities = DesiredCapabilities.CHROME.copy()
     capabilities["goog:loggingPrefs"] = {"performance": "ALL"}
 
-    driver = webdriver.Chrome(chrome_options=opts, desired_capabilities=capabilities)
+    driver = webdriver.Chrome(options=opts, desired_capabilities=capabilities)
 
     existent_urls = []
     uris_to_test = []
@@ -53,16 +60,36 @@ def bruteforce(
         uris_to_test.extend(uris)
 
     for uri in track(uris_to_test, description=f"Testing {len(uris_to_test)} urls..."):
-        url = f"{base_url}/{uri}"
-        driver.get(url)
+        starting_url = f"{base_url}/{uri}"
+        driver.get(starting_url)
+        url = driver.current_url
+
         if not_found_regexp is not None and re.search(
             not_found_regexp, driver.page_source
         ):
             continue
 
         logs = driver.get_log("performance")
-        if get_status(url, logs) == 200:
-            existent_urls.append(url)
+
+        if not ignore_status_code:
+            try:
+                status_code = get_status(url, logs)
+                if status_code != 200:
+                    continue
+            except ValueError as e:
+                if starting_url == url:
+                    log.error(e)
+                else:
+                    log.error(f"{e}, redirected from {starting_url}")
+                continue
+
+        if verbose:
+            if url != starting_url:
+                log.debug(f"Redirect: {starting_url} -> {url}")
+            else:
+                log.debug(url)
+
+        existent_urls.append(url)
 
     driver.close()
     return existent_urls

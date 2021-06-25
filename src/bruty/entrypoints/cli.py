@@ -16,16 +16,20 @@ from . import load_logger
 @click.option("-v", "--verbose", is_flag=True)
 @click.option("-n", "--not_found_regexp")
 @click.option("-u", "--uris", multiple=True)
+@click.option("-i", "--ignore_status_code", is_flag=True)
 def cli(
     url: str,
-    verbose: bool = False,
+    verbose: bool,
+    ignore_status_code: bool,
     uris_file_path: Optional[str] = None,
     uris: Optional[List[str]] = None,
     not_found_regexp: Optional[str] = None,
 ) -> None:
     """Command line interface main click entrypoint."""
     load_logger(verbose)
-    urls = bruteforce(url, uris, uris_file_path, not_found_regexp)
+    urls = bruteforce(
+        url, uris, uris_file_path, not_found_regexp, verbose, ignore_status_code
+    )
     for url in urls:
         print(url)
 

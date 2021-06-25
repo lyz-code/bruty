@@ -4,6 +4,7 @@ import logging
 import re
 
 import pytest
+from _pytest.logging import LogCaptureFixture
 from click.testing import CliRunner
 from py._path.local import LocalPath
 
@@ -86,3 +87,57 @@ def test_bruty_ignores_comments_on_uri_files(
     result = runner.invoke(cli, ["http://localhost:8000", "-f", uris_file_path])
 
     assert result.exit_code == 0
+
+
+@pytest.mark.usefixtures("_server")
+def test_bruty_verbose_shows_200_on_log(
+    runner: CliRunner, caplog: LogCaptureFixture
+) -> None:
+    """
+    Given: A uri that returns a 200
+    When: The cli is called in verbose mode
+    Then: The 200 uri is matched as soon as it appears.
+    """
+    caplog.set_level(logging.DEBUG)
+
+    result = runner.invoke(
+        cli,
+        [
+            "http://localhost:8000",
+            "-u",
+            "existent",
+            "-v",
+        ],
+    )
+
+    assert result.exit_code == 0
+    assert "http://localhost:8000/existent" in result.stdout
+    assert (
+        "bruty.services",
+        logging.DEBUG,
+        "http://localhost:8000/existent",
+    ) in caplog.record_tuples
+
+
+@pytest.mark.usefixtures("_server")
+def test_bruty_ignores_status_code_if_asked(runner: CliRunner) -> None:
+    """
+    Given: A uri that returns a 999 status code
+    When: The cli is called with ignore_status_code
+    Then: The 999 uri is registered.
+
+    This flag is interesting for websites so broken that the status codes should
+    not be trusted. It only makes sense to use in conjunction with the 404 regexp.
+    """
+    result = runner.invoke(
+        cli,
+        [
+            "http://localhost:8000",
+            "-u",
+            "status_code_999",
+            "-i",
+        ],
+    )
+
+    assert result.exit_code == 0
+    assert "http://localhost:8000/status_code_999" in result.stdout
