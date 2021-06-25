@@ -1,8 +1,6 @@
 # Bruty
 
-[![Actions Status](https://github.com/lyz-code/bruty/workflows/Tests/badge.svg)](https://github.com/lyz-code/bruty/actions)
 [![Actions Status](https://github.com/lyz-code/bruty/workflows/Build/badge.svg)](https://github.com/lyz-code/bruty/actions)
-[![Coverage Status](https://coveralls.io/repos/github/lyz-code/bruty/badge.svg?branch=master)](https://coveralls.io/github/lyz-code/bruty?branch=master)
 
 Bruteforce dynamic web applications with Selenium.
 
@@ -64,6 +62,12 @@ the `-n` flag to tell the right urls from the wrong.
 ```bash
 bruty https://fake.web -f uris.txt -i -n '404 error'
 ```
+
+### Parallelization
+
+Bruty doesn't yet support parallelization, so you'll have to do it manually,
+split your uris file into the number of processes you want with `split` and
+launch a `bruty` process for each of them.
 
 ## Contributing
 
