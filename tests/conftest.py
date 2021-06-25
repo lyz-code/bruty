@@ -14,7 +14,7 @@ def run_server() -> None:
     uvicorn.run(app)
 
 
-@pytest.fixture()
+@pytest.fixture(name="_server", scope="session")
 def _server() -> Generator[None, None, None]:
     """Start the fake api server."""
     proc = Process(target=run_server, args=(), daemon=True)

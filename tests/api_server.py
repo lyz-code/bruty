@@ -3,6 +3,7 @@
 from typing import Dict
 
 from fastapi import FastAPI, HTTPException
+from fastapi.responses import RedirectResponse
 
 app = FastAPI()
 
@@ -23,3 +24,21 @@ async def inexistent() -> None:
 async def wrong_404_page() -> Dict[str, str]:
     """Return a 200 status code even if it's not found."""
     return {"msg": "404 error"}
+
+
+@app.get("/302_to_200")
+async def rediretion_to_200() -> RedirectResponse:
+    """Return a redirection to a 200 page."""
+    return RedirectResponse("/existent")
+
+
+@app.get("/302_to_404")
+async def rediretion_to_404() -> RedirectResponse:
+    """Return a redirection to a 404 page."""
+    return RedirectResponse("/inexistent")
+
+
+@app.get("/status_code_999")
+async def status_code_999() -> None:
+    """Return a status code of 999."""
+    raise HTTPException(status_code=999, detail="Really broken website")

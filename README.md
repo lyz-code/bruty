@@ -33,6 +33,9 @@ Then run:
 bruty https://fake.web -f uris.txt
 ```
 
+If you don't want to wait until the command ends to see the results use the `-v`
+flag.
+
 ### Fake 404 pages
 
 Some sites return a 200 status code for the 404, if it's your case, inspect the
@@ -50,6 +53,16 @@ Once you know it works, run it against all the uris:
 
 ```bash
 bruty https://fake.web -f uris.txt -n '404 error'
+```
+
+### Untrusted return codes
+
+Some websites use the 200 status code when they should use 404 or even 30X. Use
+the `-i` flag to ignore the checking of the status code. It should be used with
+the `-n` flag to tell the right urls from the wrong.
+
+```bash
+bruty https://fake.web -f uris.txt -i -n '404 error'
 ```
 
 ## Contributing
